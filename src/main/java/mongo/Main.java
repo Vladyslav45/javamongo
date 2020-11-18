@@ -4,6 +4,9 @@ import com.mongodb.Block;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Accumulators;
+import com.mongodb.client.model.Aggregates;
+import com.mongodb.client.model.Projections;
 import com.mongodb.client.model.Updates;
 import org.bson.Document;
 
@@ -35,6 +38,33 @@ public class Main {
         //deleteMultiple(mongoCollection);
         //sort(mongoCollection);
         //limit(mongoCollection);
+        //aggregation(mongoCollection);
+        //aggregationWithUsingProject(mongoCollection);
+    }
+
+    private static void aggregationWithUsingProject(MongoCollection mongoCollection) {
+        mongoCollection.aggregate(Arrays.asList(
+                Aggregates.project(
+                        Projections.fields(
+                                Projections.excludeId(),
+                                Projections.include("name", "position")
+                        )
+                )
+        )).forEach(new Block<Document>() {
+            public void apply(Document document) {
+                System.out.println(document.toJson());
+            }
+        });
+    }
+
+    private static void aggregation(MongoCollection mongoCollection) {
+        mongoCollection.aggregate(Arrays.asList(
+           Aggregates.group("$position", Accumulators.avg("count", "$salary"))
+        )).forEach(new Block<Document>() {
+            public void apply(Document document) {
+                System.out.println(document.toJson());
+            }
+        });
     }
 
     private static void limit(MongoCollection mongoCollection) {
